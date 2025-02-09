@@ -13,10 +13,13 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+
 ## Usage
 ```sh
-pyton3 main.py
+python3 fetch_nasa_epic_images.py --image_directory images
+python3 fetch_nasa_apod_images.py --image_directory images --image_count 5
+python3 fetch_spacex_images.py --image_diretory images latest
 ```
-## License
 
+## License
 This project is licensed under the terms of the MIT license
