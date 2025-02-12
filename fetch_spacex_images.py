@@ -1,8 +1,9 @@
 import argparse
 import os
-import pathlib
 
 import requests
+
+from image_utils import download_image, save_image
 
 
 def fetch_images(launch_id, image_directory):
@@ -18,18 +19,6 @@ def fetch_image_links(launch_id):
     r.raise_for_status()
     photo_links = r.json()['links']['flickr']['original']
     return photo_links
-
-
-def save_image(image_path, image_bytes):
-    pathlib.Path(image_path).parent.mkdir(parents=True, exist_ok=True)
-    with open(image_path, 'wb') as f:
-        f.write(image_bytes)
-
-
-def download_image(image_url):
-    response = requests.get(image_url, headers={'User-agent': "test"})
-    response.raise_for_status()
-    return response.content
 
 
 def main():

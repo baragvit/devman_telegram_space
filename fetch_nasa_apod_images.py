@@ -4,22 +4,11 @@ import pathlib
 import urllib.parse
 
 import requests
-from dotenv import load_dotenv
+
+from image_utils import get_nasa_api_token, download_image, save_image
 
 NASA_APOD_URL = "https://api.nasa.gov/planetary/apod"
 NASA_EPIC_IMAGE_URL = "https://api.nasa.gov/EPIC/archive/natural/{year}/{month:02d}/{day:02d}/png/{image_name}.png?api_key={api_key}"
-
-
-def download_image(image_url):
-    response = requests.get(image_url, headers={'User-agent': "test"})
-    response.raise_for_status()
-    return response.content
-
-
-def save_image(image_path, image_bytes):
-    pathlib.Path(image_path).parent.mkdir(parents=True, exist_ok=True)
-    with open(image_path, 'wb') as f:
-        f.write(image_bytes)
 
 
 def fetch_file_extension(file_url):
@@ -46,8 +35,7 @@ def main():
     parser.add_argument("--image_directory", help="directory for images download", default="images")
     parser.add_argument("--image_count", help="images download count", type=int, default=30)
     args = parser.parse_args()
-    load_dotenv()
-    nasa_api_token = os.getenv("NASA_TOKEN")
+    nasa_api_token = get_nasa_api_token()
     fetch_images(nasa_api_token, args.image_count, args.image_directory)
 
 

@@ -1,11 +1,11 @@
 import argparse
 import os
-import pathlib
 import urllib.parse
 from datetime import datetime
 
 import requests
-from dotenv import load_dotenv
+
+from image_utils import download_image, save_image, get_nasa_api_token
 
 NASA_EPIC_URL = "https://api.nasa.gov/EPIC/api/natural"
 NASA_EPIC_IMAGE_URL = "https://api.nasa.gov/EPIC/archive/natural/{year}/{month:02d}/{day:02d}/png/{image_name}.png?api_key={api_key}"
@@ -33,24 +33,11 @@ def fetch_nasa_epic_images(nasa_api_token, image_directory):
         save_image(image_path, image_bytes)
 
 
-def download_image(image_url):
-    response = requests.get(image_url, headers={'User-agent': "test"})
-    response.raise_for_status()
-    return response.content
-
-
-def save_image(image_path, image_bytes):
-    pathlib.Path(image_path).parent.mkdir(parents=True, exist_ok=True)
-    with open(image_path, 'wb') as f:
-        f.write(image_bytes)
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--image_directory", help="directory for images download", default="images")
     args = parser.parse_args()
-    load_dotenv()
-    nasa_api_token = os.getenv("NASA_TOKEN")
+    nasa_api_token = get_nasa_api_token()
     fetch_nasa_epic_images(nasa_api_token, args.image_directory)
 
 
