@@ -2,11 +2,12 @@ import os
 import pathlib
 
 import requests
-from dotenv import load_dotenv
 
 
-def download_image(image_url):
-    response = requests.get(image_url, headers={'User-agent': "test"})
+def download_image(image_url, params=None):
+    if params is None:
+        params = {}
+    response = requests.get(image_url, headers={'User-agent': "test"}, params=params)
     response.raise_for_status()
     return response.content
 
@@ -18,7 +19,6 @@ def save_image(image_path, image_bytes):
 
 
 def get_nasa_api_token():
-    load_dotenv()
     nasa_api_token = os.getenv("NASA_TOKEN")
     if not nasa_api_token:
         raise NasaApiTokenNotFoundException("Api token should be provided as environment variable NASA_TOKEN")
