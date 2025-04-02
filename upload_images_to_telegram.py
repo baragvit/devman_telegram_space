@@ -1,7 +1,6 @@
 import argparse
 import os
 import random
-import tempfile
 from time import sleep
 
 import telegram
@@ -27,10 +26,19 @@ def get_shuffled_image_paths(image_directory_path):
     return image_file_paths
 
 
-def publish_images(publish_delay, image_directory, telegram_bot, telegram_chat_id):
-    image_file_paths = get_shuffled_image_paths(image_directory)
+def resize_image_if_necessary(image_file_path):
+    if os.path.getsize(image_file_path) > MAX_AVAILABLE_TELEGRAM_IMAGE_SIZE:
+        image = Image.open(image_file_path)
+        image.thumbnail(RESIZED_IMAGE_RESOLUTION, Image.Resampling.LANCZOS)
+        with open(image_file_path, 'wb') as outfile:
+            image.save(outfile, "JPEG")
+            image.close()
+
+
+def publish_images(publish_delay, image_file_paths, telegram_bot, telegram_chat_id):
     while image_file_paths:
         image_file_path = image_file_paths.pop()
+        resize_image_if_necessary(image_file_path)
         upload_file_image(image_file_path, telegram_bot, telegram_chat_id)
         sleep(publish_delay)
         if not image_file_paths:
@@ -38,16 +46,8 @@ def publish_images(publish_delay, image_directory, telegram_bot, telegram_chat_i
 
 
 def upload_file_image(image_file_path, telegram_bot, telegram_chat_id):
-    if os.path.getsize(image_file_path) < MAX_AVAILABLE_TELEGRAM_IMAGE_SIZE:
-        with open(image_file_path, 'rb') as f:
-            telegram_bot.send_photo(chat_id=telegram_chat_id, photo=f)
-    else:
-        with Image.open(image_file_path) as im:
-            with tempfile.TemporaryFile() as outfile:
-                im.thumbnail(RESIZED_IMAGE_RESOLUTION, Image.Resampling.LANCZOS)
-                im.save(outfile, "JPEG")
-                outfile.seek(0)
-                telegram_bot.send_photo(chat_id=telegram_chat_id, photo=outfile)
+    with open(image_file_path, 'rb') as f:
+        telegram_bot.send_photo(chat_id=telegram_chat_id, photo=f)
 
 
 def get_args():
@@ -69,7 +69,8 @@ def main():
     if args.image_file:
         upload_file_image(args.image_file, telegram_bot, telegram_chat_id)
     else:
-        publish_images(args.delay, args.image_directory, telegram_bot, telegram_chat_id)
+        image_file_paths = get_shuffled_image_paths(args.image_directory)
+        publish_images(args.delay, image_file_paths, telegram_bot, telegram_chat_id)
 
 
 if __name__ == '__main__':

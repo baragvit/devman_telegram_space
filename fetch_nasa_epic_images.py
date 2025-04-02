@@ -1,23 +1,15 @@
 import argparse
 import os
-import urllib.parse
 from datetime import datetime
 
 import requests
 from dotenv import load_dotenv
 
-from image_utils import download_image, save_image, get_nasa_api_token
+from image_utils import download_image, save_image
+from nasa_api_token_utils import get_nasa_api_token
 
 NASA_EPIC_URL = "https://api.nasa.gov/EPIC/api/natural"
 NASA_EPIC_IMAGE_URL_TEMPLATE = "https://api.nasa.gov/EPIC/archive/natural/{year}/{month:02d}/{day:02d}/png/{image_name}.png"
-
-
-def fetch_file_extension(file_url):
-    file_path_raw = urllib.parse.urlparse(file_url).path
-    file_path_unquoted = urllib.parse.unquote(file_path_raw)
-    _, file_name = os.path.split(file_path_unquoted)
-    _, file_extension = os.path.splitext(file_name)
-    return file_extension
 
 
 def fetch_nasa_epic_images(nasa_api_token, image_directory):
